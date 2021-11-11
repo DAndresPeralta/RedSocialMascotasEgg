@@ -68,20 +68,9 @@
                                                         </div>
                                                         <div class="col-lg-6 order-lg-1">
                                                             <div class="p-5">
-                                                                <h2 class="display-4">Ingresá a Tinder</h2>
-                                                                <form action="/logincheck" method="POST">
+                                                                <h2 class="display-4" th:text="${titulo}"></h2>
+                                                                <p th:text="${descripcion}"></p>
 
-                                                                    <p th:if="${error != null}" th:text="${error}" style="color:red"></p>
-                                                                    <p th:if="${logout != null}" th:text="${logout}" style="color:green"></p> 
-
-                                                                    <label>E-Mail</label>
-                                                                    <input type="email" class="form-control" name="username" th:value="${username}"/>
-
-                                                                    <label>Clave</label>
-                                                                    <input type="password" class="form-control" name="password"/>
-
-                                                                    <br/><button type="submit" class="btn btn-primary">Ingresar</button>
-                                                                </form>
                                                             </div>
                                                         </div>
                                                     </div>
