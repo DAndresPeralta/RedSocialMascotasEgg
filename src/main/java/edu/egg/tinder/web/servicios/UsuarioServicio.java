@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -21,6 +22,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -168,6 +171,12 @@ public class UsuarioServicio implements UserDetailsService {
 
     }
 
+    public Usuario buscarUsuarioPorId(String id) {
+
+        return usuarioRepositorio.getOne(id);
+
+    }
+
     @Override
     public UserDetails loadUserByUsername(String mail) throws UsernameNotFoundException { // Este método se llama cuando algun usuario quiera autenticarse en la página.
 
@@ -179,14 +188,12 @@ public class UsuarioServicio implements UserDetailsService {
             System.out.println(usuario.getMail());
             List<GrantedAuthority> permisos = new ArrayList<>();
 
-            GrantedAuthority p1 = new SimpleGrantedAuthority("MODULO_FOTOS");
+            GrantedAuthority p1 = new SimpleGrantedAuthority("ROLE_USUARIO_REGISTRADO");
             permisos.add(p1);
 
-            GrantedAuthority p2 = new SimpleGrantedAuthority("MODULO_MASCOTAS");
-            permisos.add(p2);
-
-            GrantedAuthority p3 = new SimpleGrantedAuthority("MODULO_VOTOS");
-            permisos.add(p3);
+            ServletRequestAttributes attr = (ServletRequestAttributes) RequestContextHolder.currentRequestAttributes(); //Esto nos permite reutilizar los datos del usuario logeado.
+            HttpSession session = attr.getRequest().getSession(true);// los cuales se pueden utilizar en la vista, por ejemplo.
+            session.setAttribute("usuariosession", usuario); // En esta linea guardamos los datos recuperados anteriormente de la BD en el objeto session.
 
             User user = new User(usuario.getMail(), usuario.getClave(), permisos);
 

@@ -1,12 +1,15 @@
 package edu.egg.tinder.web.controladores;
 
+import edu.egg.tinder.web.entidades.Usuario;
 import edu.egg.tinder.web.entidades.Zona;
 import edu.egg.tinder.web.errores.ErrorServicio;
 import edu.egg.tinder.web.repositorios.ZonaRepositorio;
 import edu.egg.tinder.web.servicios.UsuarioServicio;
 import java.io.IOException;
 import java.util.List;
+import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,18 +37,19 @@ public class PortalControlador {
         return "index.html";
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USUARIO_REGISTRADO')") // Esto es para que solo se pueda acceder a la vista luego de logearse. Tambien hay que dar el permiso en UsuarioPermiso.
     @GetMapping("/inicio")
     public String inicio() {
         return "inicio.html";
     }
 
     @GetMapping("/login2")
-    public String login2(@RequestParam(required = false) String error, @RequestParam(required = false) String logout , ModelMap modelo) { //required indica que el parametro no es obligatorio.
+    public String login2(@RequestParam(required = false) String error, @RequestParam(required = false) String logout, ModelMap modelo) { //required indica que el parametro no es obligatorio.
 
         if (error != null) {
             modelo.put("error", "Credenciales incorrectas."); // Se lanza el error si se colocan mal el usuario o clave.
         }
-        
+
         if (logout != null) {
             modelo.put("logout", "Vuelva prontos.");
         }
@@ -57,8 +61,7 @@ public class PortalControlador {
     public String registro(ModelMap modelo) {
 
         List<Zona> zonas = zonaRepositorio.findAll(); //Con esto se listan todos los elementos Zona mediante la variable zonas. Se utilizas findAll perteneciente al JpaRepo.
- 
-        
+
         modelo.put("zonas", zonas); //El primer "zonas" es la vinculación con el select del HTML registro.
 
         return "registro.html";
@@ -83,6 +86,56 @@ public class PortalControlador {
         modelo.put("titulo", "Bienvenido a Tinder de Mascotas.");
         modelo.put("descripcion", "Usuario registrado con exito.");
         return "exito.html";
+    }
+
+    @GetMapping("/editar-perfil")
+    public String editarPerfil(@RequestParam String id, ModelMap model) {
+
+        List<Zona> zonas = zonaRepositorio.findAll();
+        model.put("zonas", zonas);
+
+        try {
+
+//            Optional<Usuario> respuesta = usuarioRepositorio.findById(id);
+//
+//            if (respuesta.isPresent()) {
+//
+//                Usuario usuario = respuesta.get();
+//                model.addAttribute("perfil", usuario);
+//
+//            }
+            Usuario usuario = usuarioServicio.buscarUsuarioPorId(id);
+            model.addAttribute("perfil", usuario);
+
+        } catch (Exception e) {
+            model.addAttribute("error", e.getMessage());
+        }
+        return "perfil.html";
+    }
+
+    @PostMapping("/actualizar-perfil")
+    public String registrar(ModelMap model, HttpSession session, MultipartFile archivo, @RequestParam String id, @RequestParam String nombre, @RequestParam String apellido, @RequestParam String mail, @RequestParam String clave1, @RequestParam String clave2, @RequestParam String idZona) {
+
+        Usuario usuario = null;
+
+        try {
+
+            usuario = usuarioServicio.buscarUsuarioPorId(id);
+            usuarioServicio.modificar(archivo, id, nombre, apellido, mail, clave2, clave2, idZona);
+
+            session.setAttribute("usuariosession", usuario); //Con esto modificamos los datos de logeo en la vista.
+
+            return "redirect:/inicio"; // Redigirige a inicio.
+
+        } catch (Exception e) {
+            List<Zona> zonas = zonaRepositorio.findAll();
+            model.put("zonas", zonas);
+            model.put("error", e.getMessage());
+            model.put("perfil", usuario);
+
+            return "registro.html";
+        }
+
     }
 
 }
