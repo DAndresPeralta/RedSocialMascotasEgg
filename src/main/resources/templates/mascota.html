@@ -45,17 +45,9 @@
   </nav>
 
   <header class="masthead text-center text-white">
-    <div class="masthead-content">
-      <div class="container">
-        <h1 class="masthead-heading mb-0">Editar Perfil</h1>
-        <h2 class="masthead-subheading mb-0"></h2>
-        <a href="#" class="btn btn-primary btn-xl rounded-pill mt-5"></a>
-      </div>
-    </div>
-    <div class="bg-circle-1 bg-circle"></div>
-    <div class="bg-circle-2 bg-circle"></div>
-    <div class="bg-circle-3 bg-circle"></div>
-    <div class="bg-circle-4 bg-circle"></div>
+
+      <h1 style="margin-top:80px; text-align: center;"><span th:text="${perfil.id == null ? 'Crear' : 'Actualizar'}"></span> Mascota</h1>
+
   </header>
 
   <section>
@@ -64,7 +56,7 @@
         <div class="col-lg-6 order-lg-2">
           <div class="p-5">
               
-              <img th:if="${perfil.foto != null}" class="img-fluid rounded-circle" th:src="${'/foto/usuario/' + perfil.id}" alt="" width="50%">
+            <img th:if="${perfil.foto != null}" class="img-fluid rounded-circle" th:src="${'/foto/mascota/' + perfil.id}" alt="" width="50%">
                 
             <img th:if="${perfil.foto == null}" class="img-fluid rounded-circle" src="img/m1.jpeg" alt="">
                 
@@ -73,35 +65,27 @@
         <div class="col-lg-6 order-lg-1">
           <div class="p-5">
             <h2 class="display-4">Registrate</h2>
-            <form action="/actualizar-perfil" method="POST" enctype="multipart/form-data">
+            <form action="/mascota/actualizar-perfil" method="POST" enctype="multipart/form-data">
                 
               <p th:if="${error != null}" th:text="${error}" style="color:red;"></p> 
               
               <input type="hidden" name="id" th:value="${perfil.id}"/>              
               
-              <label>Nombre</label>
-              <input type="text" class="form-control" name="nombre" th:value="${perfil.nombre}"/>
-
-              <label>Apellido</label>
-              <input type="text" class="form-control" name="apellido" th:value="${perfil.apellido}"/>
+              <label>Nombre de la mascota</label>
+              <input type="text" class="form-control" name="nombre" th:value="${perfil.nombre}"/>  
               
-              <label>E-Mail</label>
-              <input type="email" class="form-control" name="mail" th:value="${perfil.mail}"/>
-                     
-              <label>Foto</label>
-              <input type="file" class="form-control" name="archivo"/>
-              
-              <label>Zona</label>
-              <select class="form-control" name="idZona"> 
-                   <option th:each="zona : ${zonas}" th:value="${zona.id}" th:text="${zona.nombre} " th:selected="${perfil.zona != null && zona.id == perfil.zona.id}"></option> 
+              <label>Tipo</label>
+              <select class="form-control" name="tipo"> 
+              <option th:each="tipo : ${tipos}" th:value="${tipo}" th:text="${tipo}" th:selected="${perfil.tipo != null && tipo == perfil.tipo}"></option>
               </select>
               
-              
-              <label>Clave</label>
-              <input type="password" class="form-control" name="clave1" th:value="${clave1}"/>
-              
-              <label>Repetir Clave</label>
-              <input type="password" class="form-control" name="clave2" th:value="${clave2}"/>
+              <label>Sexo</label>
+              <select class="form-control" name="sexo"> 
+              <option th:each="sexo : ${sexos}" th:value="${sexo}" th:text="${sexo}" th:selected="${perfil.sexo != null && sexo == perfil.sexo}"></option>
+              </select>           
+                     
+              <label>Foto</label>
+              <input type="file" class="form-control" name="archivo"/>             
               
               <br/><button type="submit" class="btn btn-primary">Actualizar Perfil</button>
             </form>

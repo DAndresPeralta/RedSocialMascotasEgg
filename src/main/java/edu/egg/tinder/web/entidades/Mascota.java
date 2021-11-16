@@ -1,6 +1,7 @@
 package edu.egg.tinder.web.entidades;
 
 import edu.egg.tinder.web.enumeraciones.Sexo;
+import edu.egg.tinder.web.enumeraciones.Tipo;
 import java.util.Date;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -37,11 +38,13 @@ public class Mascota {
 
     @Enumerated(EnumType.STRING)
     private Sexo sexo;
-    
+
+    @Enumerated(EnumType.STRING)
+    private Tipo tipo;
+
     @OneToOne
     private Foto foto;
 
-    
     /**
      * @return the id
      */
@@ -138,6 +141,20 @@ public class Mascota {
      */
     public void setFoto(Foto foto) {
         this.foto = foto;
+    }
+
+    /**
+     * @return the tipo
+     */
+    public Tipo getTipo() {
+        return tipo;
+    }
+
+    /**
+     * @param tipo the tipo to set
+     */
+    public void setTipo(Tipo tipo) {
+        this.tipo = tipo;
     }
 
 }

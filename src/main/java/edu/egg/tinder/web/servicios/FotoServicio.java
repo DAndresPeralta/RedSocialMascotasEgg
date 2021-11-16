@@ -24,7 +24,7 @@ public class FotoServicio {
     @Transactional //Esta anotación genera un comit y guarda en la BD si no se lanza ninguna excepcion fuera del método. Si se genera una excepción fuera del método se realiza un rollBack y no se hace el comit.
     public Foto guardar(MultipartFile archivo) throws ErrorServicio, IOException {
 
-        if (archivo != null) {
+        if (archivo != null && !archivo.isEmpty()) {
 
             try {
 

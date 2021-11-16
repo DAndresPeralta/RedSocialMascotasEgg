@@ -88,22 +88,20 @@ public class PortalControlador {
         return "exito.html";
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USUARIO_REGISTRADO')")
     @GetMapping("/editar-perfil")
-    public String editarPerfil(@RequestParam String id, ModelMap model) {
+    public String editarPerfil(HttpSession session, @RequestParam String id, ModelMap model) {
 
         List<Zona> zonas = zonaRepositorio.findAll();
         model.put("zonas", zonas);
 
+        Usuario login = (Usuario) session.getAttribute("usuariosession"); //Con esto hacemos una doble validacion del ID recibido y el ID logeado. Evitamos hacking.
+        if (login == null || !login.getId().equals(id)) {
+            return "redirect:/inicio";
+        }
+
         try {
 
-//            Optional<Usuario> respuesta = usuarioRepositorio.findById(id);
-//
-//            if (respuesta.isPresent()) {
-//
-//                Usuario usuario = respuesta.get();
-//                model.addAttribute("perfil", usuario);
-//
-//            }
             Usuario usuario = usuarioServicio.buscarUsuarioPorId(id);
             model.addAttribute("perfil", usuario);
 
@@ -113,12 +111,18 @@ public class PortalControlador {
         return "perfil.html";
     }
 
+    @PreAuthorize("hasAnyRole('ROLE_USUARIO_REGISTRADO')")
     @PostMapping("/actualizar-perfil")
     public String registrar(ModelMap model, HttpSession session, MultipartFile archivo, @RequestParam String id, @RequestParam String nombre, @RequestParam String apellido, @RequestParam String mail, @RequestParam String clave1, @RequestParam String clave2, @RequestParam String idZona) {
 
         Usuario usuario = null;
 
         try {
+
+            Usuario login = (Usuario) session.getAttribute("usuariosession"); //Con esto hacemos una doble validacion del ID recibido y el ID logeado. Evitamos hacking
+            if (login == null || !login.getId().equals(id)) {
+                return "redirect:/inicio";
+            }
 
             usuario = usuarioServicio.buscarUsuarioPorId(id);
             usuarioServicio.modificar(archivo, id, nombre, apellido, mail, clave2, clave2, idZona);
