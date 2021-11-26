@@ -5,14 +5,18 @@ import edu.egg.tinder.web.entidades.Usuario;
 import edu.egg.tinder.web.entidades.Zona;
 import edu.egg.tinder.web.enumeraciones.Sexo;
 import edu.egg.tinder.web.enumeraciones.Tipo;
+import edu.egg.tinder.web.errores.ErrorServicio;
 import edu.egg.tinder.web.servicios.MascotaServicio;
 import edu.egg.tinder.web.servicios.UsuarioServicio;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,22 +38,32 @@ public class MascotaController {
     private MascotaServicio mascotaServicio;
 
     @GetMapping("/editar-perfil")
-    public String editarPerfil(HttpSession session, @RequestParam(required = false) String id, ModelMap model) {
+    public String editarPerfil(HttpSession session, @RequestParam(required = false) String id, @RequestParam(required = false) String accion, ModelMap model) {
+
+        if (accion == null) {
+            accion = "Crear";
+
+        }
 
         Usuario login = (Usuario) session.getAttribute("usuariosession");
 
         if (login == null) { // Esto es para que no se pueda acceder sin estar logeado previamente.
-            return "redirect:/inicio";
+            return "redirect:/login";
 
         }
 
         Mascota mascota = new Mascota();
 
         if (id != null && !id.isEmpty()) { //Esto es para modificar una mascota existente. Si existe una mascota, busca su id.
-            mascota = mascotaServicio.buscarMascotaPorId(id);
+            try {
+                mascota = mascotaServicio.buscarMascotaPorId(id);
+            } catch (Exception e) {
+                Logger.getLogger(MascotaController.class.getName()).log(Level.SEVERE, null, e);
+            }
         }
 
         model.put("perfil", mascota);
+        model.put("accion", accion);
         model.put("sexos", Sexo.values());
         model.put("tipos", Tipo.values());
 
@@ -87,6 +101,7 @@ public class MascotaController {
             mascota.setSexo(sexo);
             mascota.setTipo(tipo);
 
+            model.put("accion", "Actualizar");
             model.put("sexos", Sexo.values());
             model.put("tipos", Tipo.values());
             model.put("error", e.getMessage());
@@ -96,4 +111,36 @@ public class MascotaController {
         }
 
     }
+
+    @GetMapping("/mis-mascotas")
+    public String misMascotas(HttpSession session, ModelMap model) {
+
+        Usuario login = (Usuario) session.getAttribute("usuariosession");
+
+        if (login == null) { // Esto es para que no se pueda acceder sin estar logeado previamente.
+            return "redirect:/login"; // Si es nulo, redirect te envia a la vista declarada (login).
+
+        }
+
+        List<Mascota> mascotas = mascotaServicio.buscarMascotasPorUsuario(login.getId()); //Obtengo en una lista, el listado de mascotas que posee un determinado usuario.
+        model.put("mascotas", mascotas); //Muestro en la vista la List obtenida mediante model.
+
+        return "mascotas.html";
+
+    }
+
+    @PostMapping("/eliminar-perfil")
+    public String eliminar(HttpSession session, @RequestParam String id) {
+
+        try {
+            Usuario login = (Usuario) session.getAttribute("usuariosession");
+            mascotaServicio.eliminar(login.getId(), id);
+
+        } catch (ErrorServicio ex) {
+            Logger.getLogger(MascotaController.class.getName()).log(Level.SEVERE, null, ex);
+
+        }
+        return "redirect:/mascota/mis-mascotas";
+    }
+
 }

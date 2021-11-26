@@ -10,6 +10,7 @@ import edu.egg.tinder.web.repositorios.MascotaRepositorio;
 import edu.egg.tinder.web.repositorios.UsuarioRepositorio;
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -130,6 +131,12 @@ public class MascotaServicio {
     public Mascota buscarMascotaPorId(String id) {
 
         return mascotaRepositorio.getOne(id);
+
+    }
+
+    public List<Mascota> buscarMascotasPorUsuario(String id) {
+
+        return mascotaRepositorio.buscarMascotaPorUsuario(id);
 
     }
 
